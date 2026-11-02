@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+datos/*.csv
+datos/*.parquet
+datos/*.json
+graficos/*.png
+FACTIBILIDAD.md
+.DS_Store

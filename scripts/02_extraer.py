@@ -41,8 +41,11 @@ assert N_DOCS == 200, f"Esperaba 200 docs, hay {N_DOCS}"
 SEQ_LEN = len(df_docs.iloc[0]["tokens"])  # 128
 assert SEQ_LEN == 128
 
+# fp32 siempre: pythia-70m son 70M params (~280 MB), cabe sobrado en T4 (16 GB).
+# fp16 + TransformerLens causa mismatch porque TL hace LayerNorm en fp32,
+# produciendo "mat1 and mat2 must have the same dtype, but got Float and Half".
 device = "cuda" if torch.cuda.is_available() else "cpu"
-dtype = torch.float16 if device == "cuda" else torch.float32
+dtype = torch.float32
 print(f"[02] device={device} dtype={dtype}")
 
 tokenizer = AutoTokenizer.from_pretrained("EleutherAI/pythia-70m")
@@ -80,8 +83,6 @@ for cp in CHECKPOINTS:
         print(f"[02] ERROR cargando ckpt {cp}: {e}")
         continue
     model = model.to(device)
-    if dtype == torch.float16:
-        model = model.half()
     model.eval()
 
     n_layers = int(model.cfg.n_layers)
